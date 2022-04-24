@@ -1,4 +1,4 @@
-from census import Census
+from census_area import Census
 
 # from us import states
 

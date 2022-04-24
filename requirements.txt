@@ -11,5 +11,6 @@ liccheck~=0.6.0
 pytest-cov~=2.12.1
 mdformat~=0.7.6
 census~=0.8.18
+census_area~=0.4.3
 us~=2.0.2
 dynaconf~=3.1.8
