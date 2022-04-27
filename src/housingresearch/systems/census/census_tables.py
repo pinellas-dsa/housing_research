@@ -1,6 +1,6 @@
 import pandas as pd
 
-acs_tables = {
+ACS_TABLES = {
     "B25070": {  # lookup code for one table
         "table_name": "Gross Rent as a Percentage of Household Income in the Past 12 Months",
         "variables": {
