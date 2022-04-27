@@ -27,7 +27,7 @@
 
 <!-- TODO: Replace with a brief description of your own project -->
 
-Python Boilerplate provides a common file structure for a Python project and encourages best practices in python development, including some simple code quality checks set up and some idiomatic examples of python data strctures and functions. This project is a template that can be used as a foundation for future projects.
+Note that this repo is expected to fail in Python 3.7 because importing the dependency `census_area` throws an error in Python 3.7. Please use 3.8 or higher for now. 
 
 ### Made With
 
