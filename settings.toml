@@ -1,0 +1,2 @@
+[DEFAULT]
+census_api_key = "long_alphanumeric_string_here"

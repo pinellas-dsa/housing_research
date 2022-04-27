@@ -1,4 +1,4 @@
-"""Setup script for boilerplate package."""
+"""Setup script for housing_research package."""
 import os
 
 from setuptools import find_packages
@@ -6,11 +6,11 @@ from setuptools import setup
 
 
 setup(
-    name="boilerplate",  # update this to reflect your project name
+    name="housingresearch",  # update this to reflect your project name
     version="1.0.0",
-    description="Boilerplate code for basic python package",
-    author="Sammy Solidarity",  # change this to your name or org
-    author_email="sammy@gmail.com",  # change this to your email
+    description="Research into local housing data",
+    author="James Trimarco",  # change this to your name or org
+    author_email="james.trimarco@gmail.com",  # change this to your email
     install_requires=[],
     include_package_data=True,
     package_dir={"": "src"},  # this is required to access code in src/

@@ -1,6 +1,6 @@
 import pytest
 
-from boilerplate.examples.classes import Person
+from housingresearch.examples.classes import Person
 
 
 @pytest.fixture(scope="function")
