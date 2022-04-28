@@ -40,7 +40,7 @@ class TestQuery:
     def test_init(self, test_census):
         """Tests that the new Query object initializes successfully and has type Query."""
         # execution
-        test_census.run_queries(GOOD_SPECS)
+        test_census.run_queries(GOOD_SPECS, MOCK_TABLES)
         query = test_census.queries[0]
         # validation
         assert isinstance(query, Query)
@@ -52,7 +52,7 @@ class TestQuery:
         # setup
         expected = MOCK_VARIABLES
         # execution
-        test_census.run_queries(GOOD_SPECS)
+        test_census.run_queries(GOOD_SPECS, MOCK_TABLES)
         query = test_census.queries[0]
         query.get_table_variables(table_name="B1", lookup=MOCK_TABLES)
         # validation
@@ -65,7 +65,7 @@ class TestQuery:
         isn't listed in the lookup.
         """
         # execution
-        test_census.run_queries(GOOD_SPECS)
+        test_census.run_queries(GOOD_SPECS, MOCK_TABLES)
         query = test_census.queries[0]
         # validation
         with pytest.raises(KeyError):

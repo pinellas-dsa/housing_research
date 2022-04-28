@@ -2,7 +2,7 @@ import pandas as pd
 
 MOCK_TABLES = {
     "B1": {  # lookup code for one table
-        "table_name": "Mock table data",
+        "table_name": "B1",
         "variables": {
             "001": {
                 "label": "0 to 1",
@@ -50,16 +50,16 @@ MOCK_VARIABLES = (
 GOOD_SPECS = [
     {
         "table_name": "B1",
-        "survey": "acs5",
+        "survey": "mock_survey",
         "year": 2019,
         "state": "FL",
         "place": "63000",
         "level": "tract",
     },
     {
-        "table_name": "B2",
-        "survey": "acs5",
-        "year": 2019,
+        "table_name": "B1",
+        "survey": "mock_survey",
+        "year": 2020,
         "state": "FL",
         "place": "63000",
         "level": "tract",
