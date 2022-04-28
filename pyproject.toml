@@ -62,7 +62,8 @@ max-attributes = 9
 disable = [
   "C0114",  # Disables module docstrings
   "R0201",  # Disables method could have been a function
-  "R0903"  # Disables too few public methods
+  "R0903",  # Disables too few public methods
+  "E1101",  # Disables no-member 
 ]
 
 
