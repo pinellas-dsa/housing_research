@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 from census_area import Census
 from us import states
 
@@ -23,11 +23,11 @@ class CensusClient:
         """Creates a connection to the Census by providing API key"""
         return Census(settings.census_api_key)
 
-    def run_queries(self, specs: List):
-        """"""
+    def run_queries(self, specs: Records):
+        """Loops through records and runs a Query for each set of specifications."""
         for spec in specs:
-            q = Query(spec)
-            self.queries.append(q)
+            query = Query(spec, self.census)
+            self.queries.append(query)
 
 
 class Query:
@@ -37,16 +37,19 @@ class Query:
     def __init__(
         self,
         spec: dict,
-        connection: Census,
+        conn: Census,
     ) -> None:
         """Defines the basics parameters for a query"""
-        self.table_name = spec.table_name
-        self.survey = spec.survey
-        self.year = spec.year
-        self.state = spec.state
-        self.place = spec.place
-        self.level = spec.level
-        self.connection = connection
+        try:
+            self.table_name = spec["table_name"]
+            self.survey = spec["survey"]
+            self.year = spec["year"]
+            self.state = spec["state"]
+            self.place = spec["place"]
+            self.level = spec["level"]
+        except KeyError as err:
+            raise err
+        self.conn = conn
         self.variables = ()
 
     def get_table_variables(self, table_name: str, lookup: dict) -> None:
@@ -73,7 +76,7 @@ class Query:
     def get_data_by_tract(self):
         """When we want the data grouped by tract, this method
         pings the census API and gets it in that form."""
-        api_results = self.connection.census.acs5.state_place_tract(
+        api_results = self.conn.census.acs5.state_place_tract(
             fields=self.variables,
             state=states.FL.fips,
             place=63000,
