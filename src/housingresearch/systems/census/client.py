@@ -1,7 +1,6 @@
-from census_area import Census
 from typing import List, Tuple
+from census_area import Census
 from us import states
-
 
 from housingresearch.config import settings
 
@@ -11,10 +10,9 @@ Records = List[dict]
 class CensusClient:
     """Handles interaction with the census API"""
 
-    def __init__(self, queries: tuple) -> None:
+    def __init__(self) -> None:
         self.census = self.connect()
-        for query in queries:
-            pass
+        self.queries = []
 
     @property
     def is_connected(self) -> bool:
@@ -25,6 +23,12 @@ class CensusClient:
         """Creates a connection to the Census by providing API key"""
         return Census(settings.census_api_key)
 
+    def run_queries(self, specs: List):
+        """"""
+        for spec in specs:
+            q = Query(spec)
+            self.queries.append(q)
+
 
 class Query:
     """Stores all the information about a query, including its census
@@ -32,24 +36,20 @@ class Query:
 
     def __init__(
         self,
-        table_name: str,
-        survey: str,
-        year: int,
+        spec: dict,
         connection: Census,
-        state: str = "FL",
-        place: str = "63000",
-        level: str = "tract",
     ) -> None:
         """Defines the basics parameters for a query"""
-        self.table_name = table_name
-        self.survey = survey
-        self.year = year
+        self.table_name = spec.table_name
+        self.survey = spec.survey
+        self.year = spec.year
+        self.state = spec.state
+        self.place = spec.place
+        self.level = spec.level
         self.connection = connection
-        self.state = state
-        self.place = place
-        self.level = level
+        self.variables = ()
 
-    def get_table_vars(self, table_name: str, lookup: dict) -> Tuple[str]:
+    def get_table_variables(self, table_name: str, lookup: dict) -> None:
         """Given a table name and a lookup dict, returns a tuple
         with the names of every variable and error term for that
         table.
@@ -65,16 +65,19 @@ class Query:
                 table_name + "_" + var + "M"
                 for var in table_specs["variables"]
             ]
-            vars = tuple(metrics + errors)
+            variables = tuple(metrics + errors)
         else:
-            raise "Table not found in lookup."
-        self.vars = vars
+            raise KeyError("Table not found in lookup.")
+        self.variables = variables
 
     def get_data_by_tract(self):
+        """When we want the data grouped by tract, this method
+        pings the census API and gets it in that form."""
         api_results = self.connection.census.acs5.state_place_tract(
-            fields=self.vars,
+            fields=self.variables,
             state=states.FL.fips,
             place=63000,
             year=2019,
             return_geometry=False,
         )
+        return api_results

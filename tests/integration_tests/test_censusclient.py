@@ -1,21 +1,26 @@
-from housingresearch.systems import CensusClient
+from housingresearch.systems import CensusClient, Query
 
 
 class TestCensusClient:
-    """Tests for the Person class"""
+    """Tests for the CensusClient class"""
 
-    def test_init(self):
+    def test_init(self, test_census):
         """Tests __init__() for Census and validates that:
         - Object initializes.
         """
-        # execution
-        census = CensusClient()
         # validation
-        assert isinstance(census, CensusClient)
+        assert isinstance(test_census, CensusClient)
 
-    def test_connection(self):
+    def test_connection(self, test_census):
         """Tests that new CensusClient object correctly successfully to the API."""
-        # execution
-        census = CensusClient()
         # validation
-        assert census.is_connected
+        assert test_census.is_connected
+
+
+class TestQuery:
+    """Tests for the Query class"""
+
+    def test_init(self, test_query):
+        """"""
+        # validation
+        assert isinstance(test_query, Query)
