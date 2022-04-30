@@ -38,33 +38,22 @@ class Query:
     """Stores all the information about a query, including its census
     type, its year, the table name, and the results."""
 
-    # pylint: disable=too-many-instance-attributes
-    # Ten attributes is reasonable in this case.
     # pylint: disable=broad-except
     # Seems weird to import an EsriError class that contains only "pass"
 
     # TODO: create a "Spec" class
-    # TODO: store the spec together with the Query so that we can lookup its year etc
 
     def __init__(
         self, spec: dict, conn: Census, table_lookup: dict = None
     ) -> None:
         """Defines the basics parameters for a query"""
-        try:
-            self.table_name = spec["table_name"]
-            self.survey: str = spec["survey"]
-            self.year: int = spec["year"]
-            self.state: str = spec["state"]
-            self.place: str = spec["place"]
-            self.level: str = spec["level"]
-        except KeyError as err:
-            raise err
+        self.spec = spec
         self.table_lookup: dict = table_lookup
         self.conn: Census = conn
         self.variables: Tuple[str] = self.get_table_variables(
-            self.table_name, self.table_lookup
+            self.spec["table_name"], table_lookup
         )
-        if self.level == "tract":
+        if self.spec["level"] == "tract":
             try:
                 self.api_results: Records = self.get_data_by_tract()
             except Exception:
