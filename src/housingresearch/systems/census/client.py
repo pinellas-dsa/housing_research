@@ -40,6 +40,11 @@ class Query:
 
     # pylint: disable=too-many-instance-attributes
     # Ten attributes is reasonable in this case.
+    # pylint: disable=broad-except
+    # Seems weird to import an EsriError class that contains only "pass"
+
+    # TODO: create a "Spec" class
+    # TODO: store the spec together with the Query so that we can lookup its year etc
 
     def __init__(
         self, spec: dict, conn: Census, table_lookup: dict = None
@@ -62,7 +67,7 @@ class Query:
         if self.level == "tract":
             try:
                 self.api_results: Records = self.get_data_by_tract()
-            except:
+            except Exception:
                 logger.info("API Query Failed")
         logger.info("Query instantiated.")
 

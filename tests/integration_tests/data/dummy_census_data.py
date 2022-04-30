@@ -2,7 +2,7 @@ import pandas as pd
 
 MOCK_TABLES = {
     "B1": {  # lookup code for one table
-        "table_name": "B1",
+        "table_name": "This is the table's whole long name in English",
         "variables": {
             "001": {
                 "label": "0 to 1",
