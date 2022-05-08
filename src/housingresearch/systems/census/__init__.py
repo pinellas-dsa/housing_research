@@ -1,3 +1,3 @@
-__all__ = ["ACS_TABLES"]
+__all__ = ["ACS5_TABLES"]
 
-from housingresearch.systems.census.census_tables import ACS_TABLES
+from housingresearch.systems.census.census_tables import ACS5_TABLES

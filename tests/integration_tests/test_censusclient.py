@@ -1,6 +1,8 @@
+import pandas as pd
 import pytest
 from housingresearch.systems import CensusClient, Query
 from tests.integration_tests.data import (
+    EXPECTED_COLS,
     MOCK_TABLES,
     MOCK_VARIABLES,
     GOOD_SPECS,
@@ -54,19 +56,22 @@ class TestQuery:
         # execution
         test_census.run_queries(GOOD_SPECS, MOCK_TABLES)
         query = test_census.queries[0]
-        query.get_table_variables(table_name="B1", lookup=MOCK_TABLES)
+        query.get_table_variables(table_name=query.spec["table_name"])
         # validation
         assert query.variables == expected
 
-    def test_get_table_variables_fails_when_table_name_not_in_lookup(
-        self, test_census
-    ):
-        """Tests that a KeyError is raised when given a table name that
-        isn't listed in the lookup.
-        """
+    def test_query_to_dataframe_returns_df(self, test_census):
         # execution
         test_census.run_queries(GOOD_SPECS, MOCK_TABLES)
         query = test_census.queries[0]
-        # validation
-        with pytest.raises(KeyError):
-            query.get_table_variables(table_name="B3", lookup=MOCK_TABLES)
+        df = query.to_dataframe()
+        assert isinstance(df, pd.DataFrame)
+
+    def test_query_to_dataframe_returns_expected_cols(self, test_census):
+        # setup
+        expected_cols = EXPECTED_COLS
+        # execution
+        test_census.run_queries(GOOD_SPECS, MOCK_TABLES)
+        query = test_census.queries[0]
+        df = query.df
+        assert sorted(df.columns) == sorted(expected_cols)

@@ -1,10 +1,11 @@
 from typing import List, Tuple
+import pandas as pd
 from census_area import Census
 from us import states
 from loguru import logger
 from tenacity import retry, stop_after_attempt
 from housingresearch.config import settings
-from housingresearch.systems.census import ACS_TABLES
+from housingresearch.systems.census import ACS5_TABLES
 
 Records = List[dict]
 
@@ -29,7 +30,7 @@ class CensusClient:
         """Loops through records and runs a Query for each set of specifications."""
         for spec in specs:
             if spec["survey"] == "acs5":
-                table_lookup = ACS_TABLES
+                table_lookup = ACS5_TABLES
             query = Query(spec, self.census, table_lookup)
             self.queries.append(query)
 
@@ -48,37 +49,32 @@ class Query:
     ) -> None:
         """Defines the basics parameters for a query"""
         self.spec = spec
-        self.table_lookup: dict = table_lookup
-        self.conn: Census = conn
-        self.variables: Tuple[str] = self.get_table_variables(
-            self.spec["table_name"], table_lookup
-        )
-        if self.spec["level"] == "tract":
-            try:
-                self.api_results: Records = self.get_data_by_tract()
-            except Exception:
-                logger.info("API Query Failed")
-        logger.info("Query instantiated.")
-
-    def get_table_variables(self, table_name: str, lookup: dict) -> Tuple[str]:
-        """Given a table name and a lookup dict, returns a tuple
-        with the names of every variable and error term for that
-        table.
-        """
-        if table_name in lookup:
-            print(f"Found lookup data for table {table_name}.")
-            table_specs = lookup.get(table_name)
-            metrics = [
-                table_name + "_" + var + "E"
-                for var in table_specs["variables"]
-            ]
-            errors = [
-                table_name + "_" + var + "M"
-                for var in table_specs["variables"]
-            ]
-            variables = tuple(metrics + errors)
+        if self.spec["table_name"] in table_lookup:
+            print(f"Found lookup data for table {self.spec['table_name']}.")
+            self.lookup: dict = table_lookup.get(self.spec["table_name"])
         else:
             raise KeyError("Table not found in lookup.")
+        self.conn: Census = conn
+        self.variables: Tuple[str] = self.get_table_variables(
+            self.spec["table_name"]
+        )
+        if self.spec["level"] == "tract":
+            self.api_results: Records = self.get_data_by_tract()
+            logger.info("Query instantiated.")
+        if self.api_results:
+            self.df = self.to_dataframe()
+
+    def get_table_variables(self, table_name: str) -> Tuple[str]:
+        """Given a table name, returns a tuple with the names of every
+        variable and error term for that table.
+        """
+        metrics = [
+            table_name + "_" + var + "E" for var in self.lookup["variables"]
+        ]
+        errors = [
+            table_name + "_" + var + "M" for var in self.lookup["variables"]
+        ]
+        variables = tuple(metrics + errors)
         return variables
 
     @retry(stop=stop_after_attempt(7))
@@ -86,20 +82,61 @@ class Query:
         """When we want the data grouped by tract, this method
         pings the census API and gets it in that form.
         """
-        if self.survey == "acs5":
+        if self.spec["survey"] == "acs5":
             client = self.conn.acs5
-        elif self.survey == "sf1":
+        elif self.spec["survey"] == "sf1":
             client = self.conn.sf1
         try:
             logger.info("Querying Census API.")
             api_results = client.state_place_tract(
                 fields=self.variables,
                 state=states.FL.fips,
-                place=self.place,
-                year=self.year,
+                place=self.spec["place"],
+                year=self.spec["year"],
                 return_geometry=False,
             )
             logger.info("Query successful!")
         except Exception as err:
-            print(f"{type(err).__name__} was raised.")
+            raise f"{type(err).__name__} was raised."
         return api_results
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """"""
+        df_wide = pd.DataFrame.from_records(self.api_results)
+        df_wide["year"] = self.spec["year"]
+        df_wide["place"] = self.spec["place"]
+        df_wide["table"] = self.spec["table_name"]
+        df_wide.columns = [
+            col.replace(self.spec["table_name"] + "_", "")
+            for col in df_wide.columns
+        ]
+        df_long = pd.melt(
+            df_wide,
+            id_vars=["table", "state", "county", "tract", "year"],
+            value_vars=[
+                colname
+                for colname in df_wide.columns
+                if colname.endswith("E") or colname.endswith("M")
+            ],
+        )
+        # df_long["variable_name"] = df_long.apply(find_variable_name(self.lookup.get("variables")
+        # )
+        return df_long
+
+
+# def find_variable_name()
+
+# def mark_expense_types(df: pd.DataFrame) -> pd.DataFrame:
+#     marked_df = df.apply(
+#         lambda x: match_partial_BAN(x, lookup=supply_BANs, expense_type="supplies"),
+#         axis=1,
+#     )
+#     marked_df = marked_df.apply(
+#         lambda x: match_partial_BAN(x, lookup=salary_BANs, expense_type="salary"),
+#         axis=1,
+#     )
+#     marked_df = marked_df.apply(
+#         lambda x: match_partial_BAN(x, lookup=vendor_BANs, expense_type="vendor"),
+#         axis=1,
+#     )
+#     return
