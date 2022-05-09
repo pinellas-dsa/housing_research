@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 from housingresearch.systems import CensusClient, Query
-from tests.integration_tests.data import (
+from tests.integration_tests.data.dummy_census_data import (
     EXPECTED_COLS,
     MOCK_TABLES,
     MOCK_VARIABLES,
@@ -61,17 +61,51 @@ class TestQuery:
         assert query.variables == expected
 
     def test_query_to_dataframe_returns_df(self, test_census):
+        """Tests that the `to_dataframe()` method of the Query class
+        produces an object of class DataFrame.
+        """
         # execution
         test_census.run_queries(GOOD_SPECS, MOCK_TABLES)
         query = test_census.queries[0]
-        df = query.to_dataframe()
-        assert isinstance(df, pd.DataFrame)
+        dataframe = query.to_dataframe()
+        assert isinstance(dataframe, pd.DataFrame)
 
-    def test_query_to_dataframe_returns_expected_cols(self, test_census):
+    def test_query_to_dataframe_returns_expected_cols(
+        self, test_query_dataframe
+    ):
+        """Tests that the dataframe attribute on an object of
+        class Query has the expected columns.
+        """
         # setup
         expected_cols = EXPECTED_COLS
-        # execution
-        test_census.run_queries(GOOD_SPECS, MOCK_TABLES)
-        query = test_census.queries[0]
-        df = query.df
-        assert sorted(df.columns) == sorted(expected_cols)
+        # validation
+        dataframe = test_query_dataframe
+        assert sorted(dataframe.columns) == sorted(expected_cols)
+
+    def test_dataframe_variables_are_numeric(self, test_query_dataframe):
+        """Tests that values in the column 'variable' are all
+        numeric strings.
+        """
+        # setup
+        dataframe = test_query_dataframe
+        assert all(dataframe["variable"].str.isnumeric())
+
+    def test_dataframe_variable_names_are_correct(self, test_query_dataframe):
+        """Tests that the column 'variable_name' has the correct names for
+        known variables.
+        """
+        # setup
+        dataframe = test_query_dataframe
+        cond_001 = dataframe["variable"] == "001"
+        cond_002 = dataframe["variable"] == "002"
+        cond_003 = dataframe["variable"] == "003"
+        # validation
+        assert dataframe[cond_001]["variable_name"].iloc[0] == "Total"
+        assert (
+            dataframe[cond_002]["variable_name"].iloc[0]
+            == "Less than 10.0 Percent"
+        )
+        assert (
+            dataframe[cond_003]["variable_name"].iloc[0]
+            == "10.0 to 14.9 Percent"
+        )

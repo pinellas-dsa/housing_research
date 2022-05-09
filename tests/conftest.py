@@ -1,7 +1,10 @@
 import pytest
-
 from housingresearch.config import settings
 from housingresearch.systems import CensusClient
+from tests.integration_tests.data.dummy_census_data import (
+    MOCK_TABLES,
+    GOOD_SPECS,
+)
 
 # collect_ignore = ["integration_tests"]
 
@@ -19,10 +22,12 @@ def fixture_test_census():
     return CensusClient()
 
 
-# @pytest.fixture(scope="session", name="test_query")
-# def fixture_test_query():
-#     """Runs a query from an authenticated Census client for use in integration tests"""
-#     specs = GOOD_SPECS
-#     census = CensusClient()
-#     census.run_queries(specs)
-#     return census.queries[0]
+@pytest.fixture(scope="session", name="test_query_dataframe")
+def fixture_test_query_dataframe():
+    """Creates the DataFrame attribute on an object of class Query
+    for use in integration tests
+    """
+    test_census = CensusClient()
+    test_census.run_queries(GOOD_SPECS, MOCK_TABLES)
+    query = test_census.queries[0]
+    return query.dataframe

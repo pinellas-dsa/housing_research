@@ -89,5 +89,7 @@ EXPECTED_COLS = [
     "tract",
     "year",
     "variable",
+    "variable_name",
     "value",
+    "suffix",
 ]

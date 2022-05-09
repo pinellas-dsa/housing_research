@@ -18,3 +18,5 @@ us~=2.0.2
 dynaconf~=3.1.8
 loguru~=0.6.0
 tenacity~=8.0.1
+seaborn~=0.11.2
+contextily~=1.2.0

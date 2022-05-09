@@ -42,8 +42,6 @@ class Query:
     # pylint: disable=broad-except
     # Seems weird to import an EsriError class that contains only "pass"
 
-    # TODO: create a "Spec" class
-
     def __init__(
         self, spec: dict, conn: Census, table_lookup: dict = None
     ) -> None:
@@ -62,7 +60,7 @@ class Query:
             self.api_results: Records = self.get_data_by_tract()
             logger.info("Query instantiated.")
         if self.api_results:
-            self.df = self.to_dataframe()
+            self.dataframe = self.to_dataframe()
 
     def get_table_variables(self, table_name: str) -> Tuple[str]:
         """Given a table name, returns a tuple with the names of every
@@ -101,7 +99,11 @@ class Query:
         return api_results
 
     def to_dataframe(self) -> pd.DataFrame:
-        """"""
+        """Converts the records stored in self.api_results to a DataFrame
+        format. The DataFrame is originally in "wide" format with all variables
+        in their own column, but we then convert to "long" format with one row
+        per observation.
+        """
         df_wide = pd.DataFrame.from_records(self.api_results)
         df_wide["year"] = self.spec["year"]
         df_wide["place"] = self.spec["place"]
@@ -119,24 +121,37 @@ class Query:
                 if colname.endswith("E") or colname.endswith("M")
             ],
         )
-        # df_long["variable_name"] = df_long.apply(find_variable_name(self.lookup.get("variables")
-        # )
+        df_long["suffix"] = df_long["variable"].str[-1]
+        df_long["variable"] = df_long["variable"].str[:-1]
+        df_long = self.add_variable_name_column(df_long)
         return df_long
 
+    def add_variable_name_column(
+        self, dataframe: pd.DataFrame
+    ) -> pd.DataFrame:
+        """Uses the Query.lookup dictionary to identify the name of each variable
+        in the self.dataframe attribute. Writes these names to a new column in the dataframe.
+        """
+        dataframe["variable_name"] = dataframe.apply(
+            lambda x: self.lookup["variables"].get(x.variable).get("label"),
+            axis=1,
+        )
+        return dataframe
 
-# def find_variable_name()
-
-# def mark_expense_types(df: pd.DataFrame) -> pd.DataFrame:
-#     marked_df = df.apply(
-#         lambda x: match_partial_BAN(x, lookup=supply_BANs, expense_type="supplies"),
-#         axis=1,
-#     )
-#     marked_df = marked_df.apply(
-#         lambda x: match_partial_BAN(x, lookup=salary_BANs, expense_type="salary"),
-#         axis=1,
-#     )
-#     marked_df = marked_df.apply(
-#         lambda x: match_partial_BAN(x, lookup=vendor_BANs, expense_type="vendor"),
-#         axis=1,
-#     )
-#     return
+    # class Spec:
+    #     def __init__(
+    #         self,
+    #         table_name: str,
+    #         survey: str,
+    #         year: int,
+    #         state: str,
+    #         place: str,
+    #         level: str,
+    #     ) -> None:
+    #         """"""
+    #         self.table_name = table_name
+    #         self.survey = survey
+    #         self.year = year
+    #         self.state = state
+    #         self.place = place
+    #         self.level = level
