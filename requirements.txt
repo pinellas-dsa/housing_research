@@ -20,3 +20,4 @@ loguru~=0.6.0
 tenacity~=8.0.1
 seaborn~=0.11.2
 contextily~=1.2.0
+rasterio~=1.2.10
