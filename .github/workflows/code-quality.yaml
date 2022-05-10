@@ -22,10 +22,14 @@ jobs:
       - name: Create remote .secrets file
         env:
           CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: CENSUS_API_KEY
-          path: .secrets.toml
+        run: |
+          echo $DEV_ENV_FILE >> .secrets.toml
+          cat .secrets.toml
+        shell: bash
       - name: Run tox
         run: |
           tox
+      - name: Delete .secrets file
+        run: |
+          rm .secrets.toml
+        shell: bash
