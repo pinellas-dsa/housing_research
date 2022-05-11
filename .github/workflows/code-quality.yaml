@@ -24,7 +24,7 @@ jobs:
           CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
         shell: bash
         run: |
-          echo $DEV_ENV_FILE > .secrets.toml  
+          echo $CENSUS_API_KEY > .secrets.toml  
           cat .secrets.toml
       - name: Run tox
         run: |
