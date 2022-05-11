@@ -22,10 +22,10 @@ jobs:
       - name: Create remote .secrets file
         env:
           CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
-        run: |
-          echo $DEV_ENV_FILE >> .secrets.toml
-          cat .secrets.toml
         shell: bash
+        run: |
+          echo $DEV_ENV_FILE > .secrets.toml  
+          cat .secrets.toml
       - name: Run tox
         run: |
           tox
